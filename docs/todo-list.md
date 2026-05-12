@@ -27,7 +27,7 @@ local_search - v1 minimal usable search
 ## Core modules
 [x] add config.py
 [x] add log.py
-[ ] add storage.py
+[x] add storage.py
 [x] add documents.py
 [x] add ingest.py
 [x] add query.py
@@ -46,14 +46,14 @@ local_search - v1 minimal usable search
 [x] verify local_search logs in Kibana
 
 ## Database
-[ ] initialize SQLite database
-[ ] enable/use FTS5
-[ ] add SCHEMA_VERSION
-[ ] create schema_version table
-[ ] create sources table
-[ ] create documents table
-[ ] create document_chunks table
-[ ] create chunks_fts virtual table
+[x] initialize SQLite database
+[x] enable/use FTS5
+[x] add SCHEMA_VERSION
+[x] create schema_version table
+[x] create sources table
+[x] create documents table
+[x] create document_chunks table
+[x] create chunks_fts virtual table
 
 ## Index file
 [ ] implement index-file PATH
@@ -123,13 +123,13 @@ local_search - v1 minimal usable search
 [x] show data root
 [x] show DB path
 [x] show log path
-[ ] show document count
-[ ] show chunk count
-[ ] show source counts
+[x] show document count
+[x] show chunk count
+[x] show source counts
 [x] implement doctor
 [x] check data root exists
-[ ] check DB exists or can be created
-[ ] check FTS5 is available
+[x] check DB exists or can be created
+[x] check FTS5 is available
 [x] check log path is writable
 [x] emit doctor.check.ok
 [x] emit doctor.check.fail

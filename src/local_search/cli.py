@@ -6,13 +6,21 @@ import argparse
 import os
 
 from local_search.log import log_event
-from local_search.paths import ARTIFACTS_DIR
-from local_search.paths import DATA_ROOT
-from local_search.paths import DB_PATH
-from local_search.paths import EXPORTS_DIR
-from local_search.paths import LOG_DIR
-from local_search.paths import RUN_LOG
-from local_search.paths import ensure_app_dirs
+from local_search.paths import (
+    ARTIFACTS_DIR,
+    DATA_ROOT,
+    DB_PATH,
+    EXPORTS_DIR,
+    LOG_DIR,
+    RUN_LOG,
+    ensure_app_dirs,
+)
+from local_search.storage import (
+    counts_get,
+    fts5_available_check,
+    schema_init,
+    schema_version_get,
+)
 
 
 ANSI_GREEN = "\033[32m"
@@ -99,6 +107,14 @@ def status_command() -> int:
     info_print(f"  db_exists:     {DB_PATH.exists()}")
     info_print(f"  run_log_exists:{RUN_LOG.exists()}")
 
+    counts = counts_get()
+    schema_version = schema_version_get()
+
+    info_print(f"schema_version: {schema_version}")
+    info_print(f"sources:        {counts['sources']}")
+    info_print(f"documents:      {counts['documents']}")
+    info_print(f"chunks:         {counts['chunks']}")
+
     log_event("status.done", command="status", event_outcome="success")
     return 0
 
@@ -108,12 +124,29 @@ def doctor_command() -> int:
 
     log_event("doctor.start", command="doctor")
 
+    try:
+        schema_init()
+        db_ok = DB_PATH.exists()
+    except Exception as exc:
+        db_ok = False
+        log_event(
+            "doctor.db.error",
+            command="doctor",
+            event_outcome="failure",
+            error_message=str(exc),
+            error_type=type(exc).__name__,
+        )
+
+    fts5_ok = fts5_available_check()
+
     checks = [
         ("data_root exists", DATA_ROOT.exists()),
         ("log_dir exists", LOG_DIR.exists()),
         ("artifacts_dir exists", ARTIFACTS_DIR.exists()),
         ("exports_dir exists", EXPORTS_DIR.exists()),
         ("log_dir writable", LOG_DIR.exists() and LOG_DIR.is_dir()),
+        ("db exists or can be created", db_ok),
+        ("FTS5 is available", fts5_ok),
     ]
 
     failed = False
