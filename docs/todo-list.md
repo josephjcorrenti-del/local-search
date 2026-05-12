@@ -1,25 +1,40 @@
+## Rules
+
+- Easy first, then top down.
+
+## Roadmap
+
 local_search - v1 minimal usable search
 
 Project setup
-[ ] create project skeleton
-[ ] create src/local_search package
-[ ] add pyproject.toml
-[ ] add docs/decisions.md
-[ ] add docs/todo-list.md
-[ ] add scripts/tests directory
-[ ] define data root: ~/ai/data/local_search
-[ ] define DB path: ~/ai/data/local_search/search.db
-[ ] define log path: ~/ai/data/local_search/logs/run.log
+[x] create project skeleton
+[x] create src/local_search package
+[x] add pyproject.toml
+[x] add docs/decisions.md
+[x] add docs/todo-list.md
+[x] add scripts/tests directory
+[x] define data root: data/local_search
+[x] define DB path: data/local_search/search.db
+[x] define log path: data/local_search/logs/run.log
+[x] initialize git
+[x] create GitHub repo
+[x] create virtual environment
+[x] configure editable install
+[x] create baseline pytest setup
+[x] create baseline smoke test runner
+[x] add .gitignore
 
 Core modules
-[ ] add config.py
+[x] add config.py
 [ ] add logging.py
 [ ] add storage.py
-[ ] add documents.py
-[ ] add ingest.py
-[ ] add query.py
-[ ] add ranking.py
-[ ] add cli.py
+[x] add documents.py
+[x] add ingest.py
+[x] add query.py
+[x] add ranking.py
+[x] add cli.py
+[x] add paths.py
+[x] add text.py
 
 Logging
 [ ] implement NDJSON log_event
@@ -31,11 +46,12 @@ Logging
 Database
 [ ] initialize SQLite database
 [ ] enable/use FTS5
+[ ] add SCHEMA_VERSION
+[ ] create schema_version table
 [ ] create sources table
 [ ] create documents table
 [ ] create document_chunks table
 [ ] create chunks_fts virtual table
-[ ] add schema version table
 
 Index file
 [ ] implement index-file PATH

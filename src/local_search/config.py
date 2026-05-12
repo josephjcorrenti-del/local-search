@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+SCHEMA_VERSION = 1
+
 APP_NAME = "local_search"
 
 DEFAULT_CHUNK_SIZE = 1200
