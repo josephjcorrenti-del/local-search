@@ -6,7 +6,7 @@
 
 local_search - v1 minimal usable search
 
-Project setup
+## Project setup
 [x] create project skeleton
 [x] create src/local_search package
 [x] add pyproject.toml
@@ -24,9 +24,9 @@ Project setup
 [x] create baseline smoke test runner
 [x] add .gitignore
 
-Core modules
+## Core modules
 [x] add config.py
-[ ] add logging.py
+[x] add log.py
 [ ] add storage.py
 [x] add documents.py
 [x] add ingest.py
@@ -36,14 +36,16 @@ Core modules
 [x] add paths.py
 [x] add text.py
 
-Logging
-[ ] implement NDJSON log_event
-[ ] write logs to stdout
-[ ] duplicate logs to ~/ai/data/local_search/logs/run.log
-[ ] include ts, level, event, command, run_id, event_outcome, elapsed_ms, error
-[ ] keep human CLI output separate from structured logs
+## Logging
+[x] implement NDJSON log_event
+[x] write logs to stdout when LOCAL_SEARCH_VERBOSE=1
+[x] duplicate logs to data/local_search/logs/run.log
+[x] include ts, level, event, command, run_id, event_outcome, elapsed_ms, error
+[x] keep human CLI output separate from structured logs
+[x] wire local_search logs into ELK/Filebeat
+[x] verify local_search logs in Kibana
 
-Database
+## Database
 [ ] initialize SQLite database
 [ ] enable/use FTS5
 [ ] add SCHEMA_VERSION
@@ -53,7 +55,7 @@ Database
 [ ] create document_chunks table
 [ ] create chunks_fts virtual table
 
-Index file
+## Index file
 [ ] implement index-file PATH
 [ ] validate path exists
 [ ] validate path is a file
@@ -70,7 +72,7 @@ Index file
 [ ] log index.file.skip_unchanged
 [ ] log index.file.error
 
-Index web artifact
+## Index web artifact
 [ ] implement index-web-artifact PATH
 [ ] validate artifact path exists
 [ ] support ollama_workbench web artifact JSON
@@ -88,7 +90,7 @@ Index web artifact
 [ ] log index.web_artifact.done
 [ ] log index.web_artifact.error
 
-Search
+## Search
 [ ] implement search QUERY
 [ ] use SQLite FTS5 MATCH
 [ ] rank results with BM25
@@ -106,7 +108,7 @@ Search
 [ ] log search.query.done
 [ ] log search.query.error
 
-Inspect
+## Inspect
 [ ] implement inspect-document DOC_ID
 [ ] show document metadata
 [ ] show source metadata
@@ -116,33 +118,43 @@ Inspect
 [ ] log document.inspect.start
 [ ] log document.inspect.done
 
-Status and doctor
-[ ] implement status
-[ ] show data root
-[ ] show DB path
-[ ] show log path
+## Status and doctor
+[x] implement status
+[x] show data root
+[x] show DB path
+[x] show log path
 [ ] show document count
 [ ] show chunk count
 [ ] show source counts
-[ ] implement doctor
-[ ] check data root exists
+[x] implement doctor
+[x] check data root exists
 [ ] check DB exists or can be created
 [ ] check FTS5 is available
-[ ] check log path is writable
-[ ] emit doctor.check.ok
-[ ] emit doctor.check.fail
+[x] check log path is writable
+[x] emit doctor.check.ok
+[x] emit doctor.check.fail
+[x] add colored pass/fail/info/debug CLI helpers
 
-Tests
+## Completed infrastructure
+
+[x] GitHub repo created
+[x] GitHub Actions running
+[x] ELK/Filebeat configured
+[x] local_search logs visible in Kibana
+
+## Tests
 [ ] add pytest tests for schema initialization
 [ ] add pytest tests for index-file
 [ ] add pytest tests for unchanged file skip
 [ ] add pytest tests for search returns ranked results
 [ ] add pytest tests for inspect-document
-[ ] add bash smoke test for status
-[ ] add bash smoke test for doctor
+[x] add bash smoke test for status
+[x] add bash smoke test for doctor
 [ ] add bash smoke test for index-file + search
+[x] add GitHub Actions test workflow
+[x] verify GitHub Actions passing
 
-Deferrals
+## Deferrals
 [ ] defer shell component
 [ ] defer embeddings
 [ ] defer vector database
