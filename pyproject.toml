@@ -1,0 +1,13 @@
+[project]
+name = "local-search"
+version = "0.1.0"
+description = "Local-first search engine for files and web artifacts"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+local-search = "local_search.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["src/local_search/test"]
