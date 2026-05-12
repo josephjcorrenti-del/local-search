@@ -56,20 +56,20 @@ local_search - v1 minimal usable search
 [x] create chunks_fts virtual table
 
 ## Index file
-[ ] implement index-file PATH
-[ ] validate path exists
-[ ] validate path is a file
-[ ] read plain text files only for v1
-[ ] compute sha256 hash of content
-[ ] skip unchanged files
-[ ] create source record
-[ ] create document record
-[ ] chunk content by simple character window
-[ ] store chunks in document_chunks
-[ ] insert searchable text into chunks_fts
-[ ] log index.file.start
-[ ] log index.file.done
-[ ] log index.file.skip_unchanged
+[x] implement index-file PATH
+[x] validate path exists
+[x] validate path is a file
+[x] read plain text files only for v1
+[x] compute sha256 hash of content
+[x] skip unchanged files
+[x] create source record
+[x] create document record
+[x] chunk content by simple character window
+[x] store chunks in document_chunks
+[x] insert searchable text into chunks_fts
+[x] log index.file.start
+[x] log index.file.done
+[x] log index.file.skip_unchanged
 [ ] log index.file.error
 
 ## Index web artifact

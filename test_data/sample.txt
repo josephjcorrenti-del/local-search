@@ -1,0 +1,2 @@
+local search engines are cool
+sqlite fts5 is useful

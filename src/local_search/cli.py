@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+from pathlib import Path
 
 from local_search.log import log_event
 from local_search.paths import (
@@ -20,6 +21,14 @@ from local_search.storage import (
     fts5_available_check,
     schema_init,
     schema_version_get,
+)
+from local_search.text import chunk_text
+from local_search.text import sha256_hex
+from local_search.storage import (
+    chunk_insert,
+    document_exists,
+    document_insert,
+    source_upsert,
 )
 
 
@@ -84,6 +93,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("status", help="Show local_search status.")
     subparsers.add_parser("doctor", help="Run local_search health checks.")
+
+    index_file_parser = subparsers.add_parser(
+        "index-file",
+        help="Index a local text file.",
+    )
+    index_file_parser.add_argument("path")
 
     return parser
 
@@ -183,6 +198,88 @@ def doctor_command() -> int:
     return 0
 
 
+def index_file_command(path_str: str) -> int:
+    path = Path(path_str)
+
+    log_event(
+        "index.file.start",
+        command="index-file",
+        path=str(path),
+    )
+
+    if not path.exists():
+        fail_print(f"file does not exist: {path}")
+        return 1
+
+    if not path.is_file():
+        fail_print(f"not a file: {path}")
+        return 1
+
+    text = path.read_text(encoding="utf-8")
+
+    content_sha256 = sha256_hex(text)
+
+    if document_exists(content_sha256):
+        info_print("unchanged file skipped")
+
+        log_event(
+            "index.file.skip_unchanged",
+            command="index-file",
+            path=str(path),
+            event_outcome="success",
+        )
+
+        return 0
+
+    source_id = f"src_{sha256_hex(str(path.resolve()))}"
+    document_id = f"doc_{content_sha256}"
+
+    source_upsert(
+        source_id=source_id,
+        source_type="file",
+        path=str(path.resolve()),
+    )
+
+    document_insert(
+        document_id=document_id,
+        source_id=source_id,
+        document_type="text",
+        path=str(path.resolve()),
+        raw_ref=str(path.resolve()),
+        content_sha256=content_sha256,
+        size_bytes=path.stat().st_size,
+    )
+
+    chunks = chunk_text(text)
+
+    for chunk in chunks:
+        chunk_id = f"chunk_{document_id}_{chunk['chunk_index']}"
+
+        chunk_insert(
+            chunk_id=chunk_id,
+            document_id=document_id,
+            chunk_index=chunk["chunk_index"],
+            content=chunk["content"],
+            start_char=chunk["start_char"],
+            end_char=chunk["end_char"],
+            path=str(path.resolve()),
+        )
+
+    pass_print(f"indexed {path}")
+    info_print(f"chunks: {len(chunks)}")
+
+    log_event(
+        "index.file.done",
+        command="index-file",
+        path=str(path),
+        document_id=document_id,
+        source_id=source_id,
+        event_outcome="success",
+    )
+
+    return 0
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
@@ -192,6 +289,9 @@ def main() -> int:
 
     if args.command == "doctor":
         return doctor_command()
+
+    if args.command == "index-file":
+        return index_file_command(args.path)
 
     parser.print_help()
     return 0

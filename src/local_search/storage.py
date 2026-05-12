@@ -9,6 +9,7 @@ from typing import Any
 from local_search.config import SCHEMA_VERSION
 from local_search.paths import DB_PATH
 from local_search.paths import ensure_app_dirs
+from local_search.text import sha256_hex
 
 
 def connection_get(db_path: Path = DB_PATH) -> sqlite3.Connection:
@@ -128,3 +129,144 @@ def schema_version_get(db_path: Path = DB_PATH) -> int | None:
         return None
 
     return int(row["version"])
+
+
+def source_upsert(
+    *,
+    source_id: str,
+    source_type: str,
+    path: str | None = None,
+    url: str | None = None,
+    title: str | None = None,
+) -> None:
+    """Insert or replace a source record."""
+    with connection_get() as conn:
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO sources (
+                source_id,
+                source_type,
+                path,
+                url,
+                title
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                source_id,
+                source_type,
+                path,
+                url,
+                title,
+            ),
+        )
+
+
+def document_exists(content_sha256: str) -> bool:
+    """Return True if document content already exists."""
+    with connection_get() as conn:
+        row = conn.execute(
+            """
+            SELECT 1
+            FROM documents
+            WHERE content_sha256 = ?
+            LIMIT 1
+            """,
+            (content_sha256,),
+        ).fetchone()
+
+    return row is not None
+
+
+def document_insert(
+    *,
+    document_id: str,
+    source_id: str,
+    document_type: str,
+    path: str,
+    raw_ref: str,
+    content_sha256: str,
+    size_bytes: int,
+) -> None:
+    """Insert a document record."""
+    with connection_get() as conn:
+        conn.execute(
+            """
+            INSERT INTO documents (
+                document_id,
+                source_id,
+                document_type,
+                path,
+                raw_ref,
+                content_sha256,
+                size_bytes,
+                indexed_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            """,
+            (
+                document_id,
+                source_id,
+                document_type,
+                path,
+                raw_ref,
+                content_sha256,
+                size_bytes,
+            ),
+        )
+
+def chunk_insert(
+            *,
+            chunk_id: str,
+            document_id: str,
+            chunk_index: int,
+            content: str,
+            start_char: int,
+            end_char: int,
+            path: str,
+    ) -> None:
+        """Insert a document chunk and FTS row."""
+        with connection_get() as conn:
+            cursor = conn.execute(
+                """
+                INSERT INTO document_chunks (
+                    chunk_id,
+                    document_id,
+                    chunk_index,
+                    content,
+                    start_char,
+                    end_char
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    chunk_id,
+                    document_id,
+                    chunk_index,
+                    content,
+                    start_char,
+                    end_char,
+                ),
+            )
+
+            rowid = cursor.lastrowid
+
+            conn.execute(
+                """
+                INSERT INTO chunks_fts (
+                    rowid,
+                    title,
+                    path,
+                    url,
+                    content
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    rowid,
+                    None,
+                    path,
+                    None,
+                    content,
+                ),
+            )
