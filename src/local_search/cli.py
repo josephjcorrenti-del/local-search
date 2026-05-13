@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 
+from local_search.ingest import file_index
 from local_search.log import log_event
 from local_search.paths import (
     ARTIFACTS_DIR,
@@ -25,65 +25,11 @@ from local_search.storage import (
     schema_version_get,
     search_get,
 )
-from local_search.text import chunk_text
-from local_search.text import sha256_hex
-from local_search.storage import (
-    chunk_insert,
-    document_exists,
-    document_insert,
-    source_upsert,
+from local_search.output import (
+    info_print,
+    pass_print,
+    fail_print,
 )
-
-
-ANSI_GREEN = "\033[32m"
-ANSI_RED = "\033[31m"
-ANSI_BLUE = "\033[34m"
-ANSI_YELLOW = "\033[33m"
-ANSI_RESET = "\033[0m"
-
-
-def color_enabled() -> bool:
-    """Return True if ANSI colors should be emitted."""
-    return os.environ.get("NO_COLOR") is None
-
-
-def green(text: str) -> str:
-    if not color_enabled():
-        return text
-    return f"{ANSI_GREEN}{text}{ANSI_RESET}"
-
-
-def red(text: str) -> str:
-    if not color_enabled():
-        return text
-    return f"{ANSI_RED}{text}{ANSI_RESET}"
-
-
-def color_enabled() -> bool:
-    """Return True if ANSI colors should be emitted."""
-    return os.environ.get("NO_COLOR") is None
-
-
-def _color(text: str, ansi: str) -> str:
-    if not color_enabled():
-        return text
-    return f"{ansi}{text}{ANSI_RESET}"
-
-
-def pass_print(message: str) -> None:
-    print(_color(f"[✓] {message}", ANSI_GREEN))
-
-
-def fail_print(message: str) -> None:
-    print(_color(f"[x] {message}", ANSI_RED))
-
-
-def info_print(message: str) -> None:
-    print(_color(f"[*] {message}", ANSI_BLUE))
-
-
-def debug_print(message: str) -> None:
-    print(_color(f"[debug] {message}", ANSI_YELLOW))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -230,84 +176,22 @@ def doctor_command() -> int:
 
 
 def index_file_command(path_str: str) -> int:
-    path = Path(path_str)
+    result = file_index(Path(path_str))
 
-    log_event(
-        "index.file.start",
-        command="index-file",
-        path=str(path),
-    )
-
-    if not path.exists():
-        fail_print(f"file does not exist: {path}")
+    if result["status"] == "missing":
+        fail_print(f"file does not exist: {result['path']}")
         return 1
 
-    if not path.is_file():
-        fail_print(f"not a file: {path}")
+    if result["status"] == "not_file":
+        fail_print(f"not a file: {result['path']}")
         return 1
 
-    text = path.read_text(encoding="utf-8")
-
-    content_sha256 = sha256_hex(text)
-
-    if document_exists(content_sha256):
+    if result["status"] == "unchanged":
         info_print("unchanged file skipped")
-
-        log_event(
-            "index.file.skip_unchanged",
-            command="index-file",
-            path=str(path),
-            event_outcome="success",
-        )
-
         return 0
 
-    source_id = f"src_{sha256_hex(str(path.resolve()))}"
-    document_id = f"doc_{content_sha256}"
-
-    source_upsert(
-        source_id=source_id,
-        source_type="file",
-        path=str(path.resolve()),
-    )
-
-    document_insert(
-        document_id=document_id,
-        source_id=source_id,
-        document_type="text",
-        path=str(path.resolve()),
-        raw_ref=str(path.resolve()),
-        content_sha256=content_sha256,
-        size_bytes=path.stat().st_size,
-    )
-
-    chunks = chunk_text(text)
-
-    for chunk in chunks:
-        chunk_id = f"chunk_{document_id}_{chunk['chunk_index']}"
-
-        chunk_insert(
-            chunk_id=chunk_id,
-            document_id=document_id,
-            chunk_index=chunk["chunk_index"],
-            content=chunk["content"],
-            start_char=chunk["start_char"],
-            end_char=chunk["end_char"],
-            path=str(path.resolve()),
-        )
-
-    pass_print(f"indexed {path}")
-    info_print(f"chunks: {len(chunks)}")
-
-    log_event(
-        "index.file.done",
-        command="index-file",
-        path=str(path),
-        document_id=document_id,
-        source_id=source_id,
-        event_outcome="success",
-    )
-
+    pass_print(f"indexed {result['path']}")
+    info_print(f"chunks: {result['chunk_count']}")
     return 0
 
 
