@@ -296,3 +296,54 @@ def search_get(query: str, *, limit: int = 10) -> list[dict]:
         ).fetchall()
 
     return [dict(row) for row in rows]
+
+
+def document_inspect_get(document_id: str) -> dict | None:
+    """Return document, source, and chunk metadata for inspection."""
+    with connection_get() as conn:
+        document = conn.execute(
+            """
+            SELECT
+                documents.document_id,
+                documents.source_id,
+                documents.document_type,
+                documents.title,
+                documents.path,
+                documents.url,
+                documents.content_sha256,
+                documents.size_bytes,
+                documents.raw_ref,
+                documents.created_at,
+                documents.indexed_at,
+                documents.metadata_json,
+                sources.source_type
+            FROM documents
+            JOIN sources ON documents.source_id = sources.source_id
+            WHERE documents.document_id = ?
+            """,
+            (document_id,),
+        ).fetchone()
+
+        if document is None:
+            return None
+
+        chunks = conn.execute(
+            """
+            SELECT
+                chunk_id,
+                chunk_index,
+                start_char,
+                end_char,
+                token_count,
+                length(content) AS content_chars
+            FROM document_chunks
+            WHERE document_id = ?
+            ORDER BY chunk_index
+            """,
+            (document_id,),
+        ).fetchall()
+
+    return {
+        "document": dict(document),
+        "chunks": [dict(row) for row in chunks],
+    }

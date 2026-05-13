@@ -19,6 +19,7 @@ from local_search.paths import (
 )
 from local_search.storage import (
     counts_get,
+    document_inspect_get,
     fts5_available_check,
     schema_init,
     schema_version_get,
@@ -119,6 +120,15 @@ def build_parser() -> argparse.ArgumentParser:
             limit=args.limit,
             json_output=args.json,
         )
+    )
+
+    inspect_parser = subparsers.add_parser(
+        "inspect-document",
+        help="Inspect an indexed document.",
+    )
+    inspect_parser.add_argument("document_id")
+    inspect_parser.set_defaults(
+        handler=lambda args: inspect_document_command(args.document_id)
     )
 
     return parser
@@ -337,6 +347,64 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
         print(f"   chunk_id: {result['chunk_id']}")
         print(f"   snippet: {result['snippet']}")
         print()
+
+    return 0
+
+
+def inspect_document_command(document_id: str) -> int:
+    log_event(
+        "document.inspect.start",
+        command="inspect-document",
+        document_id=document_id,
+    )
+
+    result = document_inspect_get(document_id)
+
+    if result is None:
+        fail_print(f"document not found: {document_id}")
+        log_event(
+            "document.inspect.done",
+            command="inspect-document",
+            document_id=document_id,
+            event_outcome="failure",
+            error_message="document not found",
+        )
+        return 1
+
+    document = result["document"]
+    chunks = result["chunks"]
+
+    info_print("document")
+    info_print(f"  document_id:    {document['document_id']}")
+    info_print(f"  source_id:      {document['source_id']}")
+    info_print(f"  source_type:    {document['source_type']}")
+    info_print(f"  document_type:  {document['document_type']}")
+    info_print(f"  path:           {document['path']}")
+    info_print(f"  url:            {document['url']}")
+    info_print(f"  raw_ref:        {document['raw_ref']}")
+    info_print(f"  content_sha256: {document['content_sha256']}")
+    info_print(f"  size_bytes:     {document['size_bytes']}")
+    info_print(f"  created_at:     {document['created_at']}")
+    info_print(f"  indexed_at:     {document['indexed_at']}")
+    print()
+
+    info_print("chunks")
+    info_print(f"  chunk_count:    {len(chunks)}")
+
+    for chunk in chunks:
+        info_print(
+            f"  {chunk['chunk_index']}: "
+            f"{chunk['chunk_id']} "
+            f"chars={chunk['start_char']}-{chunk['end_char']} "
+            f"content_chars={chunk['content_chars']}"
+        )
+
+    log_event(
+        "document.inspect.done",
+        command="inspect-document",
+        document_id=document_id,
+        event_outcome="success",
+    )
 
     return 0
 

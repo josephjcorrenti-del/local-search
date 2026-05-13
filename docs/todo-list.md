@@ -109,14 +109,14 @@ local_search - v1 minimal usable search
 [ ] log search.query.error
 
 ## Inspect
-[ ] implement inspect-document DOC_ID
-[ ] show document metadata
-[ ] show source metadata
-[ ] show raw_ref
-[ ] show chunk count
+[x] implement inspect-document DOC_ID
+[x] show document metadata
+[x] show source metadata
+[x] show raw_ref
+[x] show chunk count
 [ ] optionally show chunks with --chunks
-[ ] log document.inspect.start
-[ ] log document.inspect.done
+[x] log document.inspect.start
+[x] log document.inspect.done
 
 ## Status and doctor
 [x] implement status
@@ -147,7 +147,7 @@ local_search - v1 minimal usable search
 [ ] add pytest tests for index-file
 [ ] add pytest tests for unchanged file skip
 [ ] add pytest tests for search returns ranked results
-[ ] add pytest tests for inspect-document
+[x] add pytest tests for inspect-document
 [x] add bash smoke test for status
 [x] add bash smoke test for doctor
 [ ] add bash smoke test for index-file + search
