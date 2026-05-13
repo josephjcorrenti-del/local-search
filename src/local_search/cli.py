@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from pathlib import Path
 
@@ -21,6 +22,7 @@ from local_search.storage import (
     fts5_available_check,
     schema_init,
     schema_version_get,
+    search_get,
 )
 from local_search.text import chunk_text
 from local_search.text import sha256_hex
@@ -91,14 +93,33 @@ def build_parser() -> argparse.ArgumentParser:
 
     subparsers = parser.add_subparsers(dest="command")
 
-    subparsers.add_parser("status", help="Show local_search status.")
-    subparsers.add_parser("doctor", help="Run local_search health checks.")
+    status_parser = subparsers.add_parser("status", help="Show local_search status.")
+    status_parser.set_defaults(handler=lambda args: status_command())
+
+    doctor_parser = subparsers.add_parser("doctor", help="Run local_search health checks.")
+    doctor_parser.set_defaults(handler=lambda args: doctor_command())
 
     index_file_parser = subparsers.add_parser(
         "index-file",
         help="Index a local text file.",
     )
     index_file_parser.add_argument("path")
+    index_file_parser.set_defaults(handler=lambda args: index_file_command(args.path))
+
+    search_parser = subparsers.add_parser(
+        "search",
+        help="Search indexed content.",
+    )
+    search_parser.add_argument("query")
+    search_parser.add_argument("--limit", type=int, default=10)
+    search_parser.add_argument("--json", action="store_true")
+    search_parser.set_defaults(
+        handler=lambda args: search_command(
+            args.query,
+            limit=args.limit,
+            json_output=args.json,
+        )
+    )
 
     return parser
 
@@ -280,21 +301,56 @@ def index_file_command(path_str: str) -> int:
     return 0
 
 
+def search_command(query: str, *, limit: int, json_output: bool) -> int:
+    log_event(
+        "search.query.start",
+        command="search",
+        query=query,
+    )
+
+    results = search_get(query, limit=limit)
+
+    log_event(
+        "search.query.done",
+        command="search",
+        query=query,
+        event_outcome="success",
+        result_count=len(results),
+    )
+
+    if json_output:
+        print(json.dumps(results, indent=2))
+        return 0
+
+    info_print(f"results for: {query}")
+    print()
+
+    if not results:
+        info_print("no results")
+        return 0
+
+    for index, result in enumerate(results, start=1):
+        print(f"{index}. {result['path'] or result['url']}")
+        print(f"   score: {result['score']}")
+        print(f"   source: {result['source_type']}")
+        print(f"   document_id: {result['document_id']}")
+        print(f"   chunk_id: {result['chunk_id']}")
+        print(f"   snippet: {result['snippet']}")
+        print()
+
+    return 0
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
 
-    if args.command == "status":
-        return status_command()
+    handler = getattr(args, "handler", None)
+    if handler is None:
+        parser.print_help()
+        return 0
 
-    if args.command == "doctor":
-        return doctor_command()
-
-    if args.command == "index-file":
-        return index_file_command(args.path)
-
-    parser.print_help()
-    return 0
+    return handler(args)
 
 
 if __name__ == "__main__":

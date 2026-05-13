@@ -83,9 +83,7 @@ def schema_init(db_path: Path = DB_PATH) -> None:
                 title,
                 path,
                 url,
-                content,
-                content='document_chunks',
-                content_rowid='id'
+                content
             );
             """
         )
@@ -270,3 +268,31 @@ def chunk_insert(
                     content,
                 ),
             )
+
+
+def search_get(query: str, *, limit: int = 10) -> list[dict]:
+    """Return ranked FTS search results."""
+    with connection_get() as conn:
+        rows = conn.execute(
+            """
+            SELECT
+                documents.document_id,
+                document_chunks.chunk_id,
+                sources.source_type,
+                documents.path,
+                documents.url,
+                documents.title,
+                bm25(chunks_fts) AS score,
+                snippet(chunks_fts, 3, '[', ']', '...', 20) AS snippet
+            FROM chunks_fts
+            JOIN document_chunks ON chunks_fts.rowid = document_chunks.id
+            JOIN documents ON document_chunks.document_id = documents.document_id
+            JOIN sources ON documents.source_id = sources.source_id
+            WHERE chunks_fts MATCH ?
+            ORDER BY score
+            LIMIT ?
+            """,
+            (query, limit),
+        ).fetchall()
+
+    return [dict(row) for row in rows]

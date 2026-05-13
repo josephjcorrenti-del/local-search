@@ -91,21 +91,21 @@ local_search - v1 minimal usable search
 [ ] log index.web_artifact.error
 
 ## Search
-[ ] implement search QUERY
-[ ] use SQLite FTS5 MATCH
-[ ] rank results with BM25
-[ ] return document_id
-[ ] return chunk_id
-[ ] return source_type
-[ ] return path when available
-[ ] return url when available
-[ ] return title when available
-[ ] return snippet
-[ ] return score
-[ ] support --limit
-[ ] support --json
-[ ] log search.query.start
-[ ] log search.query.done
+[x] implement search QUERY
+[x] use SQLite FTS5 MATCH
+[x] rank results with BM25
+[x] return document_id
+[x] return chunk_id
+[x] return source_type
+[x] return path when available
+[x] return url when available
+[x] return title when available
+[x] return snippet
+[x] return score
+[x] support --limit
+[x] support --json
+[x] log search.query.start
+[x] log search.query.done
 [ ] log search.query.error
 
 ## Inspect
