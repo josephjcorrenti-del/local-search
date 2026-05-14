@@ -149,6 +149,16 @@ local_search - v1 minimal usable search
 [x] update storage helpers for index_path
 [x] update tests for index_path
 
+## Smart search
+[ ] make unknown/default args become search query
+[ ] keep explicit subcommands working
+[ ] add --local-only
+[ ] add --web-only later
+[ ] add web fallback placeholder first
+[ ] then implement real web search artifact creation
+
+## Useful data file names
+
 ## Tests
 [x] add pytest tests for schema initialization
 [x] add pytest tests for index-file
