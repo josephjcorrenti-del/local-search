@@ -33,7 +33,7 @@ def file_index(path: Path) -> dict[str, Any]:
         )
         return {
             "status": "missing",
-            "path": str(path),
+            "index_path": str(path),
         }
 
     if not path.is_file():
@@ -46,7 +46,7 @@ def file_index(path: Path) -> dict[str, Any]:
         )
         return {
             "status": "not_file",
-            "path": str(path),
+            "index_path": str(path),
         }
 
     resolved_path = path.resolve()
@@ -62,7 +62,7 @@ def file_index(path: Path) -> dict[str, Any]:
         )
         return {
             "status": "unchanged",
-            "path": str(path),
+            "index_path": str(path),
             "content_sha256": content_sha256,
         }
 
@@ -72,14 +72,14 @@ def file_index(path: Path) -> dict[str, Any]:
     source_upsert(
         source_id=source_id,
         source_type="file",
-        path=str(resolved_path),
+        index_path=str(resolved_path),
     )
 
     document_insert(
         document_id=document_id,
         source_id=source_id,
         document_type="text",
-        path=str(resolved_path),
+        index_path=str(resolved_path),
         raw_ref=str(resolved_path),
         content_sha256=content_sha256,
         size_bytes=path.stat().st_size,
@@ -97,7 +97,7 @@ def file_index(path: Path) -> dict[str, Any]:
             content=chunk["content"],
             start_char=chunk["start_char"],
             end_char=chunk["end_char"],
-            path=str(resolved_path),
+            index_path=str(resolved_path),
         )
 
     log_event(
@@ -111,8 +111,8 @@ def file_index(path: Path) -> dict[str, Any]:
 
     return {
         "status": "indexed",
-        "path": str(path),
-        "resolved_path": str(resolved_path),
+        "index_path": str(path),
+        "resolved_index_path": str(resolved_path),
         "document_id": document_id,
         "source_id": source_id,
         "content_sha256": content_sha256,

@@ -19,7 +19,7 @@ def test_search_returns_indexed_file(tmp_path: Path) -> None:
 
     assert len(results) >= 1
     assert results[0]["source_type"] == "file"
-    assert results[0]["path"] == str(sample.resolve())
+    assert results[0]["index_path"] == str(sample.resolve())
     assert "alpha" in results[0]["snippet"].lower()
 
 

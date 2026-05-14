@@ -9,7 +9,6 @@ from typing import Any
 from local_search.config import SCHEMA_VERSION
 from local_search.paths import DB_PATH
 from local_search.paths import ensure_app_dirs
-from local_search.text import sha256_hex
 
 
 def connection_get(db_path: Path = DB_PATH) -> sqlite3.Connection:
@@ -43,7 +42,7 @@ def schema_init(db_path: Path = DB_PATH) -> None:
             CREATE TABLE IF NOT EXISTS sources (
                 source_id TEXT PRIMARY KEY,
                 source_type TEXT NOT NULL,
-                path TEXT,
+                index_path TEXT,
                 url TEXT,
                 title TEXT,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -55,7 +54,7 @@ def schema_init(db_path: Path = DB_PATH) -> None:
                 source_id TEXT NOT NULL,
                 document_type TEXT NOT NULL,
                 title TEXT,
-                path TEXT,
+                index_path TEXT,
                 url TEXT,
                 content_sha256 TEXT NOT NULL,
                 size_bytes INTEGER,
@@ -81,7 +80,7 @@ def schema_init(db_path: Path = DB_PATH) -> None:
 
             CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
                 title,
-                path,
+                index_path,
                 url,
                 content
             );
@@ -133,7 +132,7 @@ def source_upsert(
     *,
     source_id: str,
     source_type: str,
-    path: str | None = None,
+    index_path: str | None = None,
     url: str | None = None,
     title: str | None = None,
 ) -> None:
@@ -144,7 +143,7 @@ def source_upsert(
             INSERT OR REPLACE INTO sources (
                 source_id,
                 source_type,
-                path,
+                index_path,
                 url,
                 title
             )
@@ -153,7 +152,7 @@ def source_upsert(
             (
                 source_id,
                 source_type,
-                path,
+                index_path,
                 url,
                 title,
             ),
@@ -181,7 +180,7 @@ def document_insert(
     document_id: str,
     source_id: str,
     document_type: str,
-    path: str,
+    index_path: str,
     raw_ref: str,
     content_sha256: str,
     size_bytes: int,
@@ -194,7 +193,7 @@ def document_insert(
                 document_id,
                 source_id,
                 document_type,
-                path,
+                index_path,
                 raw_ref,
                 content_sha256,
                 size_bytes,
@@ -206,7 +205,7 @@ def document_insert(
                 document_id,
                 source_id,
                 document_type,
-                path,
+                index_path,
                 raw_ref,
                 content_sha256,
                 size_bytes,
@@ -221,7 +220,7 @@ def chunk_insert(
             content: str,
             start_char: int,
             end_char: int,
-            path: str,
+            index_path: str,
     ) -> None:
         """Insert a document chunk and FTS row."""
         with connection_get() as conn:
@@ -254,7 +253,7 @@ def chunk_insert(
                 INSERT INTO chunks_fts (
                     rowid,
                     title,
-                    path,
+                    index_path,
                     url,
                     content
                 )
@@ -263,7 +262,7 @@ def chunk_insert(
                 (
                     rowid,
                     None,
-                    path,
+                    index_path,
                     None,
                     content,
                 ),
@@ -279,7 +278,7 @@ def search_get(query: str, *, limit: int = 10) -> list[dict]:
                 documents.document_id,
                 document_chunks.chunk_id,
                 sources.source_type,
-                documents.path,
+                documents.index_path,
                 documents.url,
                 documents.title,
                 bm25(chunks_fts) AS score,
@@ -308,7 +307,7 @@ def document_inspect_get(document_id: str) -> dict | None:
                 documents.source_id,
                 documents.document_type,
                 documents.title,
-                documents.path,
+                documents.index_path,
                 documents.url,
                 documents.content_sha256,
                 documents.size_bytes,

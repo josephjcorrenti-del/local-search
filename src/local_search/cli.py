@@ -179,18 +179,18 @@ def index_file_command(path_str: str) -> int:
     result = file_index(Path(path_str))
 
     if result["status"] == "missing":
-        fail_print(f"file does not exist: {result['path']}")
+        fail_print(f"file does not exist: {result['index_path']}")
         return 1
 
     if result["status"] == "not_file":
-        fail_print(f"not a file: {result['path']}")
+        fail_print(f"not a file: {result['index_path']}")
         return 1
 
     if result["status"] == "unchanged":
         info_print("unchanged file skipped")
         return 0
 
-    pass_print(f"indexed {result['path']}")
+    pass_print(f"indexed {result['index_path']}")
     info_print(f"chunks: {result['chunk_count']}")
     return 0
 
@@ -224,7 +224,7 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
         return 0
 
     for index, result in enumerate(results, start=1):
-        print(f"{index}. {result['path'] or result['url']}")
+        print(f"{index}. {result['index_path'] or result['url']}")
         print(f"   score: {result['score']}")
         print(f"   source: {result['source_type']}")
         print(f"   document_id: {result['document_id']}")
@@ -263,7 +263,7 @@ def inspect_document_command(document_id: str) -> int:
     info_print(f"  source_id:      {document['source_id']}")
     info_print(f"  source_type:    {document['source_type']}")
     info_print(f"  document_type:  {document['document_type']}")
-    info_print(f"  path:           {document['path']}")
+    info_print(f"  path:           {document['index_path']}")
     info_print(f"  url:            {document['url']}")
     info_print(f"  raw_ref:        {document['raw_ref']}")
     info_print(f"  content_sha256: {document['content_sha256']}")

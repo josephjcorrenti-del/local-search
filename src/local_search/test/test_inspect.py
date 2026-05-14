@@ -25,6 +25,6 @@ def test_document_inspect_returns_document_and_chunks(tmp_path: Path) -> None:
     assert inspected is not None
     assert inspected["document"]["document_id"] == document_id
     assert inspected["document"]["source_type"] == "file"
-    assert inspected["document"]["path"] == str(sample.resolve())
+    assert inspected["document"]["index_path"] == str(sample.resolve())
     assert len(inspected["chunks"]) == 1
     assert inspected["chunks"][0]["chunk_index"] == 0

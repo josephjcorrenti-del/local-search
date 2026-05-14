@@ -35,6 +35,7 @@ local_search - v1 minimal usable search
 [x] add cli.py
 [x] add paths.py
 [x] add text.py
+[x] add output.py
 
 ## Logging
 [x] implement NDJSON log_event
@@ -70,7 +71,7 @@ local_search - v1 minimal usable search
 [x] log index.file.start
 [x] log index.file.done
 [x] log index.file.skip_unchanged
-[ ] log index.file.error
+[x] log index.file.error
 
 ## Index web artifact
 [ ] implement index-web-artifact PATH
@@ -136,23 +137,46 @@ local_search - v1 minimal usable search
 [x] add colored pass/fail/info/debug CLI helpers
 
 ## Completed infrastructure
-
 [x] GitHub repo created
 [x] GitHub Actions running
 [x] ELK/Filebeat configured
 [x] local_search logs visible in Kibana
 
+## Path to index path
+[x] rename sources.path to sources.index_path
+[x] rename documents.path to documents.index_path
+[x] rename chunks_fts.path to chunks_fts.index_path
+[x] update storage helpers for index_path
+[x] update tests for index_path
+
 ## Tests
-[ ] add pytest tests for schema initialization
-[ ] add pytest tests for index-file
-[ ] add pytest tests for unchanged file skip
-[ ] add pytest tests for search returns ranked results
+[x] add pytest tests for schema initialization
+[x] add pytest tests for index-file
+[x] add pytest tests for unchanged file skip
+[x] add pytest tests for search returns ranked results
 [x] add pytest tests for inspect-document
 [x] add bash smoke test for status
 [x] add bash smoke test for doctor
-[ ] add bash smoke test for index-file + search
+[x] add bash smoke test for index-file + search
 [x] add GitHub Actions test workflow
 [x] verify GitHub Actions passing
+
+## Refactors
+[x] move index-file ingest workflow from cli.py to ingest.py
+[x] move CLI color/output helpers from cli.py to output.py
+[x] keep cli.py focused on orchestration
+
+## to be prioritized (tpb)
+[ ] clear all history
+[ ] all objects need human readable names <object_type>_<normalized_name>_<yyyymmddhhmmss>.<ext>
+
+### Duplicate handling
+[ ] define duplicate behavior for identical content from different sources
+[ ] define duplicate behavior for identical URLs with changed content
+[ ] define duplicate behavior for renamed artifacts with identical content
+[ ] define whether duplicate chunks should be stored or reused
+[ ] define inspect/debug visibility for duplicate detection
+[ ] define whether source_id or document_id is canonical for dedupe
 
 ## Deferrals
 [ ] defer shell component
