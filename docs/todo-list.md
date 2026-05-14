@@ -154,7 +154,7 @@ local_search - v1 minimal usable search
 [ ] keep explicit subcommands working
 [ ] add --local-only
 [ ] add --web-only later
-[ ] add web fallback placeholder first
+[x] add web fallback placeholder first
 [ ] then implement real web search artifact creation
 
 ## Useful data file names

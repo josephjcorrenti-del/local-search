@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 
 from local_search.ingest import file_index
 from local_search.log import log_event
@@ -220,7 +221,8 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
     print()
 
     if not results:
-        info_print("no results")
+        info_print("no local results")
+        info_print("web fallback not implemented yet")
         return 0
 
     for index, result in enumerate(results, start=1):
@@ -294,6 +296,32 @@ def inspect_document_command(document_id: str) -> int:
 
 
 def main() -> int:
+    known_commands = {
+        "status",
+        "doctor",
+        "index-file",
+        "search",
+        "inspect-document",
+    }
+
+    argv = sys.argv[1:]
+
+    if not argv:
+        parser = build_parser()
+        parser.print_help()
+        return 0
+
+    first = argv[0]
+
+    # Default smart/local search behavior.
+    if first not in known_commands:
+        query = " ".join(argv)
+        return search_command(
+            query,
+            limit=10,
+            json_output=False,
+        )
+
     parser = build_parser()
     args = parser.parse_args()
 

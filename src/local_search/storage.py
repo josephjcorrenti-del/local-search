@@ -11,6 +11,12 @@ from local_search.paths import DB_PATH
 from local_search.paths import ensure_app_dirs
 
 
+def fts_query_escape(query: str) -> str:
+    """Return a safe FTS5 phrase query."""
+    escaped = query.replace('"', '""')
+    return f'"{escaped}"'
+
+
 def connection_get(db_path: Path = DB_PATH) -> sqlite3.Connection:
     """Return a SQLite connection for the search database."""
     ensure_app_dirs()
@@ -291,7 +297,7 @@ def search_get(query: str, *, limit: int = 10) -> list[dict]:
             ORDER BY score
             LIMIT ?
             """,
-            (query, limit),
+            (fts_query_escape(query), limit),
         ).fetchall()
 
     return [dict(row) for row in rows]
