@@ -156,25 +156,25 @@ local_search - v1 minimal usable search
 [x] add safe FTS phrase query handling
 [ ] add --local-only
 [ ] add --web-only later
-[ ] define search provider interface
+[x] define search provider interface
 [ ] add provider config
-[ ] move current web fallback behind provider boundary
-[ ] support SearXNG provider
-[ ] use SearXNG as preferred provider
-[ ] save web search results as local_search artifacts
-[ ] print web results immediately when local results are empty
+[x] move current web fallback behind provider boundary
+[x] support SearXNG provider
+[x] use SearXNG as preferred provider
+[x] save web search results as local_search artifacts
+[x] print web results immediately when local results are empty
 [ ] optionally index saved web search result artifacts
 [ ] add smoke test for smart search fallback
 
 ## Internet search provider
-[ ] stand up local SearXNG service
-[ ] enable JSON output in SearXNG
-[ ] verify SearXNG search API manually
+[x] stand up local SearXNG service
+[x] enable JSON output in SearXNG
+[x] verify local SearXNG search API manually
 [ ] add local_search config for provider name
 [ ] add local_search config for provider URL
 [ ] add SearXNG result parser
-[ ] preserve provider-agnostic result contract: title, url, snippet
-[ ] keep DuckDuckGo out of core search logic
+[x] preserve provider-agnostic result contract: title, url, snippet
+[x] keep DuckDuckGo out of core search logic
 
 ## Smart search follow-through
 [ ] auto-index saved web search artifacts
@@ -183,6 +183,13 @@ local_search - v1 minimal usable search
 [ ] add provider timing/error logging
 [ ] add LOCAL_SEARCH_SEARXNG_URL config
 [ ] add search provider timeout handling
+
+## Runtime vs test isolation
+[ ] separate runtime DB from pytest DB
+[ ] stop tests from deleting runtime search.db
+[ ] stop smoke tests from showing empty runtime state after pytest
+[ ] add dedicated test DB path/config
+[ ] ensure smoke tests validate runtime behavior, not pytest cleanup state
 
 ## Tests
 [x] add pytest tests for schema initialization
