@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import sys
 
-from local_search.ingest import file_index
+from local_search.ingest import file_index, web_artifact_index
 from local_search.log import log_event
 from local_search.paths import (
     ARTIFACTS_DIR,
@@ -18,6 +18,11 @@ from local_search.paths import (
     RUN_LOG,
     ensure_app_dirs,
 )
+from local_search.output import (
+    info_print,
+    pass_print,
+    fail_print,
+)
 from local_search.storage import (
     counts_get,
     document_inspect_get,
@@ -26,11 +31,7 @@ from local_search.storage import (
     schema_version_get,
     search_get,
 )
-from local_search.output import (
-    info_print,
-    pass_print,
-    fail_print,
-)
+from local_search.web_search import web_search
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -76,6 +77,15 @@ def build_parser() -> argparse.ArgumentParser:
     inspect_parser.add_argument("document_id")
     inspect_parser.set_defaults(
         handler=lambda args: inspect_document_command(args.document_id)
+    )
+
+    index_web_artifact_parser = subparsers.add_parser(
+        "index-web-artifact",
+        help="Index a saved web artifact JSON file.",
+    )
+    index_web_artifact_parser.add_argument("path")
+    index_web_artifact_parser.set_defaults(
+        handler=lambda args: index_web_artifact_command(args.path)
     )
 
     return parser
@@ -203,6 +213,7 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
         query=query,
     )
 
+    schema_init()
     results = search_get(query, limit=limit)
 
     log_event(
@@ -222,7 +233,22 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
 
     if not results:
         info_print("no local results")
-        info_print("web fallback not implemented yet")
+        info_print("searching web")
+        print()
+
+        web_result = web_search(query)
+
+        if not web_result["results"]:
+            info_print("no web results")
+            return 0
+
+        for index, result in enumerate(web_result["results"], start=1):
+            print(f"{index}. {result['title']}")
+            print(f"   url: {result['url']}")
+            print(f"   snippet: {result['snippet']}")
+            print()
+
+        pass_print(f"saved web artifact: {web_result['artifact_path']}")
         return 0
 
     for index, result in enumerate(results, start=1):
@@ -265,7 +291,7 @@ def inspect_document_command(document_id: str) -> int:
     info_print(f"  source_id:      {document['source_id']}")
     info_print(f"  source_type:    {document['source_type']}")
     info_print(f"  document_type:  {document['document_type']}")
-    info_print(f"  path:           {document['index_path']}")
+    info_print(f"  index_path:     {document['index_path']}")
     info_print(f"  url:            {document['url']}")
     info_print(f"  raw_ref:        {document['raw_ref']}")
     info_print(f"  content_sha256: {document['content_sha256']}")
@@ -295,11 +321,36 @@ def inspect_document_command(document_id: str) -> int:
     return 0
 
 
+def index_web_artifact_command(path_str: str) -> int:
+    result = web_artifact_index(Path(path_str))
+
+    if result["status"] == "missing":
+        fail_print(f"artifact does not exist: {result['index_path']}")
+        return 1
+
+    if result["status"] == "not_file":
+        fail_print(f"not a file: {result['index_path']}")
+        return 1
+
+    if result["status"] == "empty":
+        fail_print(f"artifact has no content_text: {result['index_path']}")
+        return 1
+
+    if result["status"] == "unchanged":
+        info_print("unchanged web artifact skipped")
+        return 0
+
+    pass_print(f"indexed web artifact {result['index_path']}")
+    info_print(f"chunks: {result['chunk_count']}")
+    return 0
+
+
 def main() -> int:
     known_commands = {
         "status",
         "doctor",
         "index-file",
+        "index-web-artifact",
         "search",
         "inspect-document",
     }

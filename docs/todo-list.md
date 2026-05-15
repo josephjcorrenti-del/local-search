@@ -74,21 +74,21 @@ local_search - v1 minimal usable search
 [x] log index.file.error
 
 ## Index web artifact
-[ ] implement index-web-artifact PATH
-[ ] validate artifact path exists
-[ ] support ollama_workbench web artifact JSON
-[ ] extract url when present
-[ ] extract title when present
-[ ] extract content/text when present
-[ ] store original artifact path as raw_ref
-[ ] compute sha256 hash of extracted content
-[ ] skip unchanged artifacts
-[ ] create source record
-[ ] create document record
-[ ] chunk extracted content
-[ ] insert chunks into FTS index
-[ ] log index.web_artifact.start
-[ ] log index.web_artifact.done
+[x] implement index-web-artifact PATH
+[x] validate artifact path exists
+[x] support ollama_workbench web artifact JSON
+[x] extract url when present
+[x] extract title when present
+[x] extract content/text when present
+[x] store original artifact path as raw_ref
+[x] compute sha256 hash of extracted content
+[x] skip unchanged artifacts
+[x] create source record
+[x] create document record
+[x] chunk extracted content
+[x] insert chunks into FTS index
+[x] log index.web_artifact.start
+[x] log index.web_artifact.done
 [ ] log index.web_artifact.error
 
 ## Search
@@ -150,14 +150,39 @@ local_search - v1 minimal usable search
 [x] update tests for index_path
 
 ## Smart search
-[ ] make unknown/default args become search query
-[ ] keep explicit subcommands working
+[x] make unknown/default args become search query
+[x] keep explicit subcommands working
+[x] add web fallback placeholder first
+[x] add safe FTS phrase query handling
 [ ] add --local-only
 [ ] add --web-only later
-[x] add web fallback placeholder first
-[ ] then implement real web search artifact creation
+[ ] define search provider interface
+[ ] add provider config
+[ ] move current web fallback behind provider boundary
+[ ] support SearXNG provider
+[ ] use SearXNG as preferred provider
+[ ] save web search results as local_search artifacts
+[ ] print web results immediately when local results are empty
+[ ] optionally index saved web search result artifacts
+[ ] add smoke test for smart search fallback
 
-## Useful data file names
+## Internet search provider
+[ ] stand up local SearXNG service
+[ ] enable JSON output in SearXNG
+[ ] verify SearXNG search API manually
+[ ] add local_search config for provider name
+[ ] add local_search config for provider URL
+[ ] add SearXNG result parser
+[ ] preserve provider-agnostic result contract: title, url, snippet
+[ ] keep DuckDuckGo out of core search logic
+
+## Smart search follow-through
+[ ] auto-index saved web search artifacts
+[ ] avoid duplicate indexing of identical web search results
+[ ] prefer local hits after artifact acquisition
+[ ] add provider timing/error logging
+[ ] add LOCAL_SEARCH_SEARXNG_URL config
+[ ] add search provider timeout handling
 
 ## Tests
 [x] add pytest tests for schema initialization
@@ -187,6 +212,19 @@ local_search - v1 minimal usable search
 [ ] define whether duplicate chunks should be stored or reused
 [ ] define inspect/debug visibility for duplicate detection
 [ ] define whether source_id or document_id is canonical for dedupe
+
+### Own internet search
+
+[ ] define what “own internet search” means for local_search
+[ ] compare SearXNG metasearch vs YaCy crawler/index vs custom crawler
+[ ] stand up SearXNG locally as first practical provider
+[ ] enable SearXNG JSON output
+[ ] verify local SearXNG API with `curl`
+[ ] configure local_search to use SearXNG provider URL
+[ ] keep provider details out of cli.py
+[ ] document that SearXNG is metasearch, not a full independent web index
+[ ] evaluate YaCy as future true self-hosted crawler/search option
+[ ] decide whether custom crawling belongs in local_search or a separate project
 
 ## Deferrals
 [ ] defer shell component

@@ -1,5 +1,20 @@
 # local_search Decisions
 
+## 2026-05-15 - Meaning of local_search
+
+`local_search` means the user owns the search interface, artifacts, logs, local index, and retrieval workflow.
+
+It does not mean offline-only search or local-files-only search.
+
+The tool should support internet discovery through replaceable providers, with SearXNG preferred over hardcoded public search engines.
+
+Default search should remain useful:
+- search local index first
+- if no local results, query the configured internet search provider
+- print provider results immediately
+- save results as local_search-owned artifacts
+- keep provider details out of cli.py
+
 ## 2026-05-11 - Project purpose
 
 `local_search` is a local-first search engine for personal files and saved web artifacts.
