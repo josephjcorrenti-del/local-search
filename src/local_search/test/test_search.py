@@ -9,7 +9,7 @@ def test_search_returns_indexed_file(tmp_path: Path) -> None:
 
     sample = tmp_path / "sample.txt"
     sample.write_text(
-        "unique sqlite search test content alpha bravo\n",
+        f"unique sqlite search test content alpha bravo {tmp_path}\n",
         encoding="utf-8",
     )
 
@@ -28,7 +28,7 @@ def test_search_missing_term_returns_empty_list(tmp_path: Path) -> None:
 
     sample = tmp_path / "sample.txt"
     sample.write_text(
-        "unique missing term test content charlie delta\n",
+        f"unique missing term test content charlie delta {tmp_path}\n",
         encoding="utf-8",
     )
 
