@@ -14,7 +14,7 @@ def test_document_inspect_returns_document_and_chunks(tmp_path: Path) -> None:
         f"inspect document test content echo foxtrot {tmp_path}\n",
         encoding="utf-8",
     )
-    
+
     index_file_command(str(sample))
 
     results = search_get("foxtrot", limit=10)

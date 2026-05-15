@@ -187,7 +187,7 @@ local_search - v1 minimal usable search
 ## Runtime vs test isolation
 [ ] separate runtime DB from pytest DB
 [ ] stop tests from deleting runtime search.db
-[ ] stop smoke tests from showing empty runtime state after pytest
+[x] stop smoke tests from showing empty runtime state after pytest
 [ ] add dedicated test DB path/config
 [ ] ensure smoke tests validate runtime behavior, not pytest cleanup state
 
