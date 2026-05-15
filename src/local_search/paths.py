@@ -16,6 +16,7 @@ EXPORTS_DIR = DATA_ROOT / "exports"
 
 DB_PATH = DATA_ROOT / "search.db"
 RUN_LOG = LOG_DIR / "run.log"
+WEB_ARTIFACTS_DIR = ARTIFACTS_DIR / "web"
 
 
 def ensure_app_dirs() -> None:
@@ -24,3 +25,4 @@ def ensure_app_dirs() -> None:
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    WEB_ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
