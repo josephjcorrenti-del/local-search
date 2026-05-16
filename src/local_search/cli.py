@@ -249,6 +249,15 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
             print()
 
         pass_print(f"saved web artifact: {web_result['artifact_path']}")
+        index_result = web_artifact_index(Path(web_result["artifact_path"]))
+
+        if index_result["status"] == "indexed":
+            pass_print(f"indexed web artifact: {index_result['document_id']}")
+            info_print(f"chunks: {index_result['chunk_count']}")
+        elif index_result["status"] == "unchanged":
+            info_print("web artifact already indexed")
+        else:
+            fail_print(f"web artifact auto-index failed: {index_result['status']}")
         return 0
 
     for index, result in enumerate(results, start=1):

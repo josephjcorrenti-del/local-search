@@ -12,9 +12,15 @@ from local_search.paths import ensure_app_dirs
 
 
 def fts_query_escape(query: str) -> str:
-    """Return a safe FTS5 phrase query."""
-    escaped = query.replace('"', '""')
-    return f'"{escaped}"'
+    """Return a safe FTS5 query for all terms in any order."""
+    terms = query.split()
+    escaped_terms = []
+
+    for term in terms:
+        escaped = term.replace('"', '""')
+        escaped_terms.append(f'"{escaped}"')
+
+    return " ".join(escaped_terms)
 
 
 def connection_get(db_path: Path = DB_PATH) -> sqlite3.Connection:
