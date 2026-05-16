@@ -197,7 +197,7 @@ local_search - v1 minimal usable search
 [x] keep safe escaping for hyphenated terms
 [x] prefer local hits for similar/reordered queries before web fallback
 [x] add tests for `PA trees` vs `trees of PA`
-[ ] improve stop-word handling (`of`, `the`, `and`)
+[x] improve stop-word handling (`of`, `the`, `and`)
 [ ] investigate ranking quality for common terms
 [ ] optionally support OR queries later
 

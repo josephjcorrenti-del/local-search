@@ -72,3 +72,21 @@ def test_search_handles_hyphenated_terms(tmp_path: Path) -> None:
     results = search_get("x-men", limit=10)
 
     assert len(results) >= 1
+
+
+def test_search_ignores_common_stop_words(tmp_path: Path) -> None:
+    schema_init()
+
+    sample = tmp_path / "sample.txt"
+    sample.write_text(
+        f"harrisburg population census data {tmp_path}\n",
+        encoding="utf-8",
+    )
+
+    index_file_command(str(sample))
+
+    results = search_get("population of harrisburg", limit=10)
+
+    assert len(results) >= 1
+    assert results[0]["source_type"] == "file"
+    assert results[0]["index_path"] == str(sample.resolve())

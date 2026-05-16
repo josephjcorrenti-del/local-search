@@ -11,9 +11,31 @@ from local_search.paths import DB_PATH
 from local_search.paths import ensure_app_dirs
 
 
+FTS_STOP_WORDS = {
+    "a",
+    "an",
+    "and",
+    "for",
+    "in",
+    "of",
+    "or",
+    "the",
+    "to",
+}
+
+
 def fts_query_escape(query: str) -> str:
-    """Return a safe FTS5 query for all terms in any order."""
-    terms = query.split()
+    """Return a safe FTS5 query for meaningful terms in any order."""
+    raw_terms = query.split()
+
+    filtered_terms = [
+        term
+        for term in raw_terms
+        if term.lower() not in FTS_STOP_WORDS
+    ]
+
+    terms = filtered_terms or raw_terms
+
     escaped_terms = []
 
     for term in terms:
