@@ -228,7 +228,7 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
         print(json.dumps(results, indent=2))
         return 0
 
-    info_print(f"results for: {query}")
+    info_print(f"local results for: {query}")
     print()
 
     if not results:
@@ -249,6 +249,7 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
             print()
 
         pass_print(f"saved web artifact: {web_result['artifact_path']}")
+
         index_result = web_artifact_index(Path(web_result["artifact_path"]))
 
         if index_result["status"] == "indexed":
@@ -258,10 +259,33 @@ def search_command(query: str, *, limit: int, json_output: bool) -> int:
             info_print("web artifact already indexed")
         else:
             fail_print(f"web artifact auto-index failed: {index_result['status']}")
+
         return 0
 
-    for index, result in enumerate(results, start=1):
-        print(f"{index}. {result['index_path'] or result['url']}")
+    seen_documents = set()
+    collapsed_results = []
+
+    for result in results:
+        document_id = result["document_id"]
+
+        if result["source_type"] != "web_artifact":
+            if document_id in seen_documents:
+                continue
+            seen_documents.add(document_id)
+
+        collapsed_results.append(result)
+
+    for index, result in enumerate(collapsed_results, start=1):
+        display_title = result["title"] or result["index_path"] or result["url"]
+        display_url = result["url"]
+
+        print(f"{index}. {display_title}")
+
+        if display_url:
+            print(f"   url: {display_url}")
+        else:
+            print(f"   path: {result['index_path']}")
+
         print(f"   score: {result['score']}")
         print(f"   source: {result['source_type']}")
         print(f"   document_id: {result['document_id']}")

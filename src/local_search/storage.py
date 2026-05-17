@@ -247,15 +247,17 @@ def document_insert(
         )
 
 def chunk_insert(
-            *,
-            chunk_id: str,
-            document_id: str,
-            chunk_index: int,
-            content: str,
-            start_char: int,
-            end_char: int,
-            index_path: str,
-    ) -> None:
+    *,
+    chunk_id: str,
+    document_id: str,
+    chunk_index: int,
+    content: str,
+    start_char: int,
+    end_char: int,
+    index_path: str,
+    title: str | None = None,
+    url: str | None = None,
+) -> None:
         """Insert a document chunk and FTS row."""
         with connection_get() as conn:
             cursor = conn.execute(
@@ -295,9 +297,9 @@ def chunk_insert(
                 """,
                 (
                     rowid,
-                    None,
+                    title,
                     index_path,
-                    None,
+                    url,
                     content,
                 ),
             )
@@ -309,14 +311,14 @@ def search_get(query: str, *, limit: int = 10) -> list[dict]:
         rows = conn.execute(
             """
             SELECT
-                documents.document_id,
-                document_chunks.chunk_id,
-                sources.source_type,
-                documents.index_path,
-                documents.url,
-                documents.title,
-                bm25(chunks_fts) AS score,
-                snippet(chunks_fts, 3, '[', ']', '...', 20) AS snippet
+               documents.document_id,
+               document_chunks.chunk_id,
+               sources.source_type,
+               documents.index_path,
+               chunks_fts.url,
+               chunks_fts.title,
+               bm25(chunks_fts) AS score,
+               snippet(chunks_fts, 3, '[', ']', '...', 20) AS snippet
             FROM chunks_fts
             JOIN document_chunks ON chunks_fts.rowid = document_chunks.id
             JOIN documents ON document_chunks.document_id = documents.document_id

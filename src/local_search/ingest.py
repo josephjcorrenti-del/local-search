@@ -193,18 +193,58 @@ def web_artifact_index(path: Path) -> dict[str, Any]:
 
     chunks = chunk_text(content_text)
 
-    for chunk in chunks:
-        chunk_id = f"chunk_{document_id}_{chunk['chunk_index']}"
+    results = artifact.get("results")
 
-        chunk_insert(
-            chunk_id=chunk_id,
-            document_id=document_id,
-            chunk_index=chunk["chunk_index"],
-            content=chunk["content"],
-            start_char=chunk["start_char"],
-            end_char=chunk["end_char"],
-            index_path=str(resolved_path),
-        )
+    if isinstance(results, list) and results:
+        chunks = []
+
+        for index, result in enumerate(results):
+            title = str(result.get("title") or "").strip()
+            url = str(result.get("url") or "").strip()
+            snippet = str(result.get("snippet") or "").strip()
+
+            content = "\n".join(
+                part for part in [title, url, snippet] if part
+            )
+
+            if not content.strip():
+                continue
+
+            chunk_id = f"chunk_{document_id}_{index}"
+
+            chunk_insert(
+                chunk_id=chunk_id,
+                document_id=document_id,
+                chunk_index=index,
+                content=content,
+                start_char=0,
+                end_char=len(content),
+                index_path=str(resolved_path),
+                title=title or None,
+                url=url or None,
+            )
+
+            chunks.append(
+                {
+                    "chunk_index": index,
+                    "content": content,
+                }
+            )
+    else:
+        chunks = chunk_text(content_text)
+
+        for chunk in chunks:
+            chunk_id = f"chunk_{document_id}_{chunk['chunk_index']}"
+
+            chunk_insert(
+                chunk_id=chunk_id,
+                document_id=document_id,
+                chunk_index=chunk["chunk_index"],
+                content=chunk["content"],
+                start_char=chunk["start_char"],
+                end_char=chunk["end_char"],
+                index_path=str(resolved_path),
+            )
 
     log_event(
         "index.web_artifact.done",
